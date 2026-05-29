@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: api-comandvoice
+app:
+  integration:
+    n8n:
+      webhook-url: https://n8n.derikdev.cloud/webhook-test/comand-voice

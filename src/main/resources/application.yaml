@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: api-comandvoice
+
+# logs em JSON
+logging:
+  structured:
+    format:
+      console: ecs
+
+app:
+  integration:
+    n8n:
+      webhook-url: ${N8N_WEBHOOK_URL:https://n8n.derikdev.cloud/webhook-test/comand-voice}
