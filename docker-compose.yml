@@ -9,7 +9,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_PROFILE_ACTIVE=prod
       - N8N_WEBHOOK_URL=${N8N_WEBHOOK_URL}
       # DIRECIONA OS LOGS DO SPRING PARA O ARQUIVO INTERNO DO CONTAINER
       - LOGGING_FILE_NAME=/app/logs/application.log
@@ -28,7 +28,7 @@ services:
     container_name: promtail-container
     restart: always
     environment:
-      - GRAFANA_LOKI_URL:${GRAFANA_LOKI_URL}
+      - GRAFANA_LOKI_URL=${GRAFANA_LOKI_URL}
     volumes:
       - ./promtail-config.yml:/etc/promtail/config.yml
       # O PROMTAIL LÊ DIRETO DA PASTA COMPARTILHADA LOCALMENTE
