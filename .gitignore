@@ -1,13 +1,38 @@
-# Default ignored files
+
+.env
+*.local
+
+.idea/
+*.iml
+*.iws
+*.ipr
+/out/
+.vscode/
+
+# Ignorados padrões do plugin HTTP Client do IntelliJ
 /shelf/
-/.idea/workspace.xml
-# Editor-based HTTP Client requests
 /httpRequests/
-# Ignored default folder with query files
 /queries/
-# Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
 
-.env
-.idea/
+# Guarda os binários, .class e pacotes .jar gerados localmente
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# Evita subir os binários pesados do Maven Wrapper
+.mvn/timing.properties
+.mvn/wrapper/.maven-wrapper.jar
+
+# Ignora a pasta de logs gerada pelo Spring e mapeada no Docker
+logs/
+*.log
+
+.DS_Store
+Thumbs.dbz
