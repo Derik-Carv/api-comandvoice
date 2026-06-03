@@ -2,16 +2,20 @@ spring:
   application:
     name: api-comandvoice
   datasource:
-    url: ''
-    username: ''
-    password: ''
-    driver-class-name: org.postgres.Driver
+    url: jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     database: POSTGRESQL
     hibernate:
       ddl-auto: update
     show-sql: true
+  sql:
+    init:
+      mode: always
+      separator: "^;"
 
 # logs em JSON
 logging:
