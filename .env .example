@@ -1,3 +1,9 @@
 # Exemplo de configuração - Preencha com seus dados locais
 N8N_WEBHOOK_URL=
 GRAFANA_LOKI_URL=
+
+# DATABASE
+
+POSTGRES_DB=
+POSTGRES_USER=
+POSTGRES_PASSWORD=

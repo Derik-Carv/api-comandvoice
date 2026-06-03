@@ -1,6 +1,17 @@
 spring:
   application:
     name: api-comandvoice
+  datasource:
+    url: ''
+    username: ''
+    password: ''
+    driver-class-name: org.postgres.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: POSTGRESQL
+    hibernate:
+      ddl-auto: update
+    show-sql: true
 
 # logs em JSON
 logging:
