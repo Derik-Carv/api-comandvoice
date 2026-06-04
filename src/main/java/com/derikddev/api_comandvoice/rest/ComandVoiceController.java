@@ -22,11 +22,12 @@ public class ComandVoiceController {
 
     private final ComandVoiceService comandVoiceService;
 
-    String trackingId = UUID.randomUUID().toString();
+
 
     @PostMapping
     public ResponseEntity<String> entryPointVoiceComand(@Valid @RequestBody ComandVoiceRequest request){
         String responseAuto = comandVoiceService.forwardProcess(request);
+        String trackingId = UUID.randomUUID().toString();
 
         log.atInfo()
                 .setMessage("Validate dates in Response Entity")

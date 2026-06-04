@@ -9,19 +9,13 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - N8N_WEBHOOK_URL=${N8N_WEBHOOK_URL}
-<<<<<<< HEAD
-=======
       - DB_HOST=db
       - DB_PORT=5432
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASSWORD}
       - DB_PASSWORD=${DB_PASSWORD}
->>>>>>> 63db586 (return to grafana cloudd logger and adjust env examples and adjust conect db in compose filee)
       - LOGGING_FILE_NAME=/app/logs/application.log
-      - DB_HOST=${DB_HOST}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
     volumes:
       - ./logs:/app/logs
     networks:
@@ -32,29 +26,19 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    depends_on:
-      db:
-        condition: service_healthy # Garante que a API só tenta ligar DEPOIS que o Postgres estiver aceitando conexões
 
-  betterstack-collector:
-    image: ghcr.io/betterstackhq/collector:latest
-    container_name: better-stack-collector
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail-container
     restart: always
-    uts: host
     environment:
-      - COLLECTOR_SECRET=${TOKEN_LOG}
-      - VECTOR_LOG_FORMAT=json
+      - GRAFANA_LOKI_URL=${GRAFANA_LOKI_URL}
     volumes:
-<<<<<<< HEAD
-      - /:/host:ro
-      - /var/lib/better-stack:/var/lib/better-stack
-=======
       - ./promtail-config.yml:/etc/promtail/config.yml
       - ./logs:/var/log/api:ro
     command: -config.file=/etc/promtail/config.yml -config.expand-env=true
     networks:
       - comandvoice-network
->>>>>>> 63db586 (return to grafana cloudd logger and adjust env examples and adjust conect db in compose filee)
     depends_on:
       - api-comandvoice
 
@@ -74,11 +58,7 @@ services:
     networks:
       - comandvoice-network
     healthcheck:
-<<<<<<< HEAD
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-=======
       test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
->>>>>>> 63db586 (return to grafana cloudd logger and adjust env examples and adjust conect db in compose filee)
       interval: 5s
       timeout: 5s
       retries: 5

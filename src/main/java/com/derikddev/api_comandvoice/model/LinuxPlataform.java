@@ -11,10 +11,11 @@ import java.util.UUID;
 @Component
 public class LinuxPlataform implements StrategyPlatform{
 
-    String trackingId = UUID.randomUUID().toString();
+
 
     @Override
     public boolean conditionPlataform(String plaform) {
+        String trackingId = UUID.randomUUID().toString();
         log.atInfo()
                 .setMessage("expected plataform: LINUX")
                 .addKeyValue("tracking_Id", trackingId)
@@ -24,6 +25,7 @@ public class LinuxPlataform implements StrategyPlatform{
 
     @Override
     public void execCustomComand(@NonNull ComandVoiceRequest request){
+        String trackingId = UUID.randomUUID().toString();
         log.atInfo()
                 .setMessage("Executando comandos de voz compatíveis com: Linux")
                 .addKeyValue("tracking_Id", trackingId)

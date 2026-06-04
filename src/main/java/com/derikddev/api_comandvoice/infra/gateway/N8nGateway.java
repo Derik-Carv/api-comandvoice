@@ -15,9 +15,10 @@ public class N8nGateway {
 
     private final RestClient restClient;
     private final String n8nurl;
-    String trackingId = UUID.randomUUID().toString();
+
 
     public N8nGateway(@Value("${app.integration.n8n.webhook-url}") String n8nurl) {
+        String trackingId = UUID.randomUUID().toString();
         log.atInfo()
                 .setMessage("Starting connection with n8n")
                 .addKeyValue("tracking_Id", trackingId)
@@ -28,6 +29,7 @@ public class N8nGateway {
 
     public String sendComand(ComandVoiceRequest request){
         try {
+            String trackingId = UUID.randomUUID().toString();
             log.atInfo()
                     .setMessage("Forward payload for webhook in n8n")
                     .addKeyValue("tracking_Id", trackingId)
@@ -46,6 +48,7 @@ public class N8nGateway {
                     .log();
             return n8nResponse;
         } catch (Exception e) {
+            String trackingId = UUID.randomUUID().toString();
             log.atInfo()
                     .setMessage("Fatal error in comuniction HTTP with n8n")
                     .addKeyValue("tracking_Id", trackingId)
