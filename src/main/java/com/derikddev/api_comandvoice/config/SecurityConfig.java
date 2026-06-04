@@ -23,9 +23,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable()) // Desabilita para APIs stateless
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll());
+                        .anyRequest().permitAll() // Altere aqui para definir suas rotas públicas/privadas
+                );
         return http.build();
     }
 

@@ -7,12 +7,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILE_ACTIVE=prod
+      - SPRING_PROFILES_ACTIVE=prod
       - N8N_WEBHOOK_URL=${N8N_WEBHOOK_URL}
-      # DIRECIONA OS LOGS DO SPRING PARA O ARQUIVO INTERNO DO CONTAINER
       - LOGGING_FILE_NAME=/app/logs/application.log
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
     volumes:
-      # CRIA A PONTE DA SUA MÁQUINA LOCAL PARA A PASTA DE LOGS DA API
       - ./logs:/app/logs
     restart: always
     logging:
@@ -20,18 +22,21 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    depends_on:
+      db:
+        condition: service_healthy # Garante que a API só tenta ligar DEPOIS que o Postgres estiver aceitando conexões
 
-  promtail:
-    image: grafana/promtail:latest
-    container_name: promtail-container
+  betterstack-collector:
+    image: ghcr.io/betterstackhq/collector:latest
+    container_name: better-stack-collector
     restart: always
+    uts: host
     environment:
-      - GRAFANA_LOKI_URL=${GRAFANA_LOKI_URL}
+      - COLLECTOR_SECRET=${TOKEN_LOG}
+      - VECTOR_LOG_FORMAT=json
     volumes:
-      - ./promtail-config.yml:/etc/promtail/config.yml
-      # O PROMTAIL LÊ DIRETO DA PASTA COMPARTILHADA LOCALMENTE
-      - ./logs:/var/log/api:ro
-    command: -config.file=/etc/promtail/config.yml -config.expand-env=true
+      - /:/host:ro
+      - /var/lib/better-stack:/var/lib/better-stack
     depends_on:
       - api-comandvoice
 
@@ -40,7 +45,8 @@ services:
     container_name: db-comandvoice
     restart: always
     shm_size: '256mb'
-    network_mode: "host"  # Faz o Postgres rodar direto na porta 5432 da máquina física
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -48,7 +54,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
