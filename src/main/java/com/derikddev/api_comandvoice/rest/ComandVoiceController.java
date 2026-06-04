@@ -22,8 +22,6 @@ public class ComandVoiceController {
 
     private final ComandVoiceService comandVoiceService;
 
-
-
     @PostMapping
     public ResponseEntity<String> entryPointVoiceComand(@Valid @RequestBody ComandVoiceRequest request){
         String responseAuto = comandVoiceService.forwardProcess(request);

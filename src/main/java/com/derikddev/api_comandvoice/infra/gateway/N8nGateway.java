@@ -4,6 +4,7 @@ import com.derikddev.api_comandvoice.dto.request.ComandVoiceRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -18,6 +19,11 @@ public class N8nGateway {
 
 
     public N8nGateway(@Value("${app.integration.n8n.webhook-url}") String n8nurl) {
+        // Configurando timeouts de forma explícita para evitar travar a API
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(5000);
+        requestFactory.setReadTimeout(60000);
+
         String trackingId = UUID.randomUUID().toString();
         log.atInfo()
                 .setMessage("Starting connection with n8n")
