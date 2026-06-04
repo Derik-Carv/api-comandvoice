@@ -1,8 +1,11 @@
-# Exemplo de configuração - Preencha com seus dados locais
-N8N_WEBHOOK_URL=
-GRAFANA_LOKI_URL=
+# Configurações do n8n
+N8N_WEBHOOK_URL="YOUR_URL_TEST_IN_N8N"
+
+# Configurações do Grafana / Promtail
+GRAFANA_LOKI_URL='YOUR_URL_IN_GRAAFANA_CLOUD'
 
 # DATABASE
+<<<<<<< HEAD
 
 POSTGRES_DB=
 POSTGRES_USER=
@@ -10,3 +13,9 @@ POSTGRES_PASSWORD=
 
 # LOGGER
 TOKEN_LOG=
+=======
+DB_HOST=host.docker.internal
+DB_NAME=example_db
+DB_USER=userexample
+DB_PASSWORD=123
+>>>>>>> 63db586 (return to grafana cloudd logger and adjust env examples and adjust conect db in compose filee)

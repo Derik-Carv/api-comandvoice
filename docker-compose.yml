@@ -9,6 +9,14 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - N8N_WEBHOOK_URL=${N8N_WEBHOOK_URL}
+<<<<<<< HEAD
+=======
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+>>>>>>> 63db586 (return to grafana cloudd logger and adjust env examples and adjust conect db in compose filee)
       - LOGGING_FILE_NAME=/app/logs/application.log
       - DB_HOST=${DB_HOST}
       - DB_NAME=${DB_NAME}
@@ -16,6 +24,8 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
     volumes:
       - ./logs:/app/logs
+    networks:
+      - comandvoice-network
     restart: always
     logging:
       driver: "json-file"
@@ -35,8 +45,16 @@ services:
       - COLLECTOR_SECRET=${TOKEN_LOG}
       - VECTOR_LOG_FORMAT=json
     volumes:
+<<<<<<< HEAD
       - /:/host:ro
       - /var/lib/better-stack:/var/lib/better-stack
+=======
+      - ./promtail-config.yml:/etc/promtail/config.yml
+      - ./logs:/var/log/api:ro
+    command: -config.file=/etc/promtail/config.yml -config.expand-env=true
+    networks:
+      - comandvoice-network
+>>>>>>> 63db586 (return to grafana cloudd logger and adjust env examples and adjust conect db in compose filee)
     depends_on:
       - api-comandvoice
 
@@ -53,11 +71,21 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - comandvoice-network
     healthcheck:
+<<<<<<< HEAD
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+=======
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+>>>>>>> 63db586 (return to grafana cloudd logger and adjust env examples and adjust conect db in compose filee)
       interval: 5s
       timeout: 5s
       retries: 5
 
 volumes:
   pgdata:
+
+networks:
+  comandvoice-network:
+    driver: bridge
