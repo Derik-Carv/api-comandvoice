@@ -1,4 +1,4 @@
-package com.derikddev.api_comandvoice.model;
+package com.derikddev.api_comandvoice.model.plataforms;
 
 import com.derikddev.api_comandvoice.dto.request.ComandVoiceRequest;
 import lombok.extern.slf4j.Slf4j;

@@ -2,7 +2,7 @@ package com.derikddev.api_comandvoice.service;
 
 import com.derikddev.api_comandvoice.dto.request.ComandVoiceRequest;
 import com.derikddev.api_comandvoice.infra.gateway.N8nGateway;
-import com.derikddev.api_comandvoice.model.StrategyPlatform;
+import com.derikddev.api_comandvoice.model.plataforms.StrategyPlatform;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
