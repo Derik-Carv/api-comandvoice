@@ -2,11 +2,13 @@ package com.derikddev.api_comandvoice.model.repository;
 
 import com.derikddev.api_comandvoice.dto.database.Stage;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface StageRepository extends JpaRepository<Stage, Long> {
+@Repository
+public interface StageRepository extends JpaRepository<Stage, String> { // Alterado para String aqui
 
-    Stage findByStageKey (Long id);
+    Stage findByStageKey(String stageKey);
 
-    Stage finddByDescription (String description);
+    Stage findByDescription(String description);
 
 }
