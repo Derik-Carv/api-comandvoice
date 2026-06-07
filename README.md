@@ -1,165 +1,202 @@
 # API ComandVoice 🚀
 
-Este projeto é uma API desenvolvida em **Java 21** com o framework **Spring Boot 4**, projetada para atuar como um orquestrador de comandos de voz. A aplicação integra automações via **n8n** e centraliza o envio de logs estruturados (formato ECS) para o **Grafana Cloud Loki** através do coletor **Promtail**.
-
-Toda a arquitetura foi desenhada utilizando o conceito de **Injeção de Configurações por Ambiente**, garantindo que nenhuma chave, token ou URL de produção fique exposta no histórico do código-fonte ou no GitHub.
+`api-comandvoice` é uma API em **Java 21** com **Spring Boot 4** que atua como orquestrador de comandos de voz. A aplicação recebe payloads HTTP, encaminha para webhooks do **n8n** e envia logs estruturados em formato ECS para o **Grafana Cloud Loki** via **Promtail**.
 
 ---
 
-# 🎯 Arquitetura de Configuração e Fluxo de Dados
-
-O fluxo de dados e injeção de variáveis funciona da seguinte forma:
+# Visão Geral da Arquitetura
 
 ```text
-[ Front-end / Cliente ]
+[ Cliente / Front-end ]
         │
-        └──(Porta 8080)──>
-
-[ Docker Container ]
-        │
-        └──(Injeta .env)──>
-
-[ Spring Boot API ]
-        │
-        └──(Gera application.log)
         ▼
+[ api-comandvoice (Spring Boot) ]
+        ├─ POST /api/comands
+        │    └─ encaminha para n8n webhook principal
+        ├─ POST /api/comands/receptionist
+        │    └─ encaminha para n8n webhook receptionist
+        └─ GET /api/stage
+             └─ consulta dados de estágio no PostgreSQL
 
-[ Grafana Cloud Loki ]
-        ▲
-        │
-[ Container Promtail ] <──(Lê Volume)─── [ Pasta /logs ]
+[ api-comandvoice ]
+        └─ grava logs ECS em ./logs/application.log
+                ▼
+[ Promtail ]
+        └─ envia logs para Grafana Cloud Loki
 ```
 
-1. **`src/main/resources/application.yaml`**: Mapeia as propriedades internas do Spring para variáveis do Sistema Operacional usando a sintaxe `${NOME_DA_VARIAVEL:valor_padrao}`.
-2. **`docker-compose.yml`**: Lê as variáveis reais do seu arquivo local `.env` e as injeta dinamicamente dentro dos containers da API e do Promtail no momento da execução.
+## O que está incluso
+
+- endpoints HTTP para envio de comandos de voz
+- integração com n8n via webhooks configuráveis
+- persistência em PostgreSQL
+- logs estruturados ECS escritos em um volume local
+- coleta de logs com Promtail e envio para Loki
 
 ---
 
-# 🛠️ Tecnologias e Pré-requisitos
+# Requisitos
 
-Para rodar a stack completa na sua máquina local, você precisa apenas de:
+- Docker 20.10+
+- Docker Compose 2+
+- Git
 
-1. **Git**: Para clonar e gerenciar o repositório.
-2. **Docker** (versão 20.10+): Motor de containerização.
-3. **Docker Compose** (versão 2.0+): Ferramenta para gerenciar o ecossistema multi-container.
-
-> 💡 **Vantagem do Docker Multi-Stage:** Você **não precisa** ter o Java JDK ou o Maven instalados fisicamente na sua máquina. O arquivo `Dockerfile` realiza o build da aplicação de forma isolada dentro do container utilizando uma imagem oficial do Maven e exportando apenas o binário final leve para a execução.
+> Não é necessário ter Maven ou JDK instalados localmente. O build ocorre dentro do container Docker.
 
 ---
 
-# 🔑 Onde Adquirir as Chaves e Tokens?
+# Configuração de Ambiente
 
-A aplicação necessita de duas integrações externas configuradas no seu arquivo `.env` local:
+A aplicação usa variáveis de ambiente definidas em `src/main/resources/application.yaml`.
 
-## 1. URL do Webhook do n8n
-
-- **O que é:** O endereço HTTP que receberá as cargas de dados processadas pela API.
-- **Como obter:**
-    1. Acesse o seu painel do **n8n** (self-hosted ou cloud).
-    2. Crie ou abra o seu Workflow de comandos de voz.
-    3. Adicione um nó do tipo **Webhook**, configure o método HTTP para `POST` e copie a **Webhook URL** gerada.
-
-> Recomenda-se utilizar a URL de *Test* durante o desenvolvimento local.
-
----
-
-## 2. URL do Grafana Loki (HTTP Basic Auth)
-
-- **O que é:** O ponto de entrada seguro para onde o Promtail enviará os logs.
-- **Como obter:**
-    1. Acesse sua conta no Grafana Cloud.
-    2. No painel principal do seu Workspace, localize o card do **Loki** e clique em **Details**.
-    3. Copie o campo **URL**.
-    4. Gere um **Access Policy Token** com permissão `logs:write`.
-    5. Monte sua URL final do Loki utilizando autenticação HTTP Basic:
-
-```text
-https://<USER_ID>:<API_TOKEN>@<LOKI_URL_SEM_HTTP>/loki/api/v1/push
-```
-
----
-
-# 🚀 Como Executar o Projeto Localmente
-
-## Passo 1: Clonar o Repositório
+## Criar o arquivo `.env`
 
 ```bash
-git clone git@github.com:Derik-Carv/api-comandvoice.git
-cd api-comandvoice
+cp ".env .example" .env
 ```
 
----
-
-## Passo 2: Configurar o Arquivo de Ambiente (.env)
-
-Como o arquivo `.env` original contém seus tokens privados e é permanentemente ignorado pelo Git (via `.gitignore`), crie uma cópia local a partir do modelo de exemplo:
-
-```bash
-cp .env.example .env
-```
-
-Abra o arquivo `.env` gerado e preencha com as suas chaves reais:
+## Variáveis obrigatórias
 
 ```env
-# URL completa do webhook configurado no seu painel do n8n
-N8N_WEBHOOK_URL=https://n8n.seu-dominio.com/webhook/comand-voice
-
-# URL de Push do Loki com as credenciais embutidas (User ID + API Token)
-GRAFANA_LOKI_URL=https://123456:glc_TOKEN_AQUI@logs-prod-us-central1.grafana.net/loki/api/v1/push
+N8N_WEBHOOK_URL="https://<seu-n8n>/webhook/<id>"
+N8N_WEBHOOK_URL_RECEPTIONIST="https://<seu-n8n>/webhook/<id>"
+GRAFANA_LOKI_URL="https://<USER_ID>:<API_TOKEN>@<seu-loki-host>/loki/api/v1/push"
+DB_NAME=comandvoice_db
+DB_USER=exampleuser
+DB_PASSWORD=examplepassword
 ```
+
+## Observação de segurança
+
+Nunca adicione valores reais de secret keys, URLs de webhook ou credenciais ao Git.
+
+O seu `.env` local deve permanecer privado e veio com dados reais no ambiente atual:
+- `N8N_WEBHOOK_URL`
+- `N8N_WEBHOOK_URL_RECEPTIONIST`
+- `GRAFANA_LOKI_URL`
+- `DB_PASSWORD`
 
 ---
 
-## Passo 3: Inicializar a Stack com o Docker
-
-Execute o comando abaixo para compilar a aplicação em Java 21 e subir os serviços da API e do coletor de logs em segundo plano:
+# Como executar
 
 ```bash
 docker compose up -d --build
 ```
 
----
+### Parar a stack
 
-# 📁 Estrutura do Arquivo `.env.example`
-
-O arquivo de exemplo disponibilizado no repositório serve como guia público de quais variáveis a aplicação espera para rodar:
-
-```env
-# ==============================================================================
-# CONFIGURAÇÕES DA API COMANDVOICE (EXEMPLO)
-# ==============================================================================
-
-# Insira a URL do webhook do n8n responsável por processar o comando recebido
-N8N_WEBHOOK_URL=
-
-# Insira a URL completa do endpoint Loki do seu Grafana Cloud com as credenciais
-GRAFANA_LOKI_URL=
+```bash
+docker compose down
 ```
 
 ---
 
-# 🛠️ Comandos Úteis de Manutenção (Cheat Sheet)
+# Endpoints da API
 
-Use os comandos abaixo na pasta raiz do projeto para gerenciar e inspecionar a aplicação:
+## POST `/api/comands`
+
+Encaminha um comando de voz para o webhook principal do n8n.
+
+### Exemplo de request
+
+```json
+{
+  "comand": "ligar a luz",
+  "system": "whatsapp",
+  "plataform": "whatsapp"
+}
+```
+
+## POST `/api/comands/receptionist`
+
+Encaminha um payload de recepcionista para o webhook receptionist.
+
+### Exemplo de request
+
+```json
+{
+  "body": "solicitar suporte",
+  "platform": "whatsapp",
+  "system": "whatsapp"
+}
+```
+
+## GET `/api/stage`
+
+Retorna todos os registros de estágio armazenados no banco de dados.
+
+---
+
+# Configuração do Banco de Dados
+
+O projeto usa PostgreSQL e inicializa o schema a partir de `src/main/resources/schema.sql`.
+
+A configuração do Spring Boot em `application.yaml` define:
+
+```yaml
+spring:
+  sql:
+    init:
+      mode: always
+      separator: "^;"
+```
+
+---
+
+# Serviços Docker
+
+- `api-comandvoice`: build da API com Maven + Java 21
+- `promtail`: coleta logs do diretório `./logs` e envia para Loki
+- `db`: PostgreSQL 16
+
+---
+
+# Comandos úteis
 
 | Objetivo | Comando |
 |---|---|
-| Subir ou atualizar a stack inteira em background | `docker compose up -d --build` |
-| Derrubar e parar todos os containers da aplicação | `docker compose down` |
-| Visualizar logs da API Java em tempo real | `docker compose logs -f api-comandvoice` |
-| Visualizar logs do Promtail (Coletor de logs) | `docker compose logs -f promtail` |
-| Verificar o status e mapeamento de portas atual | `docker compose ps` |
-| Inspecionar as variáveis de ambiente ativas no container | `docker exec -it api-comandvoice-container env` |
-| Forçar limpeza de caches antigos de build do Docker | `docker builder prune -a` |
+| Subir a stack | `docker compose up -d --build` |
+| Parar a stack | `docker compose down` |
+| Ver logs da API | `docker compose logs -f api-comandvoice` |
+| Ver logs do Promtail | `docker compose logs -f promtail` |
+| Ver containers ativos | `docker compose ps` |
+| Inspecionar ambiente | `docker exec -it api-comandvoice-container env` |
+| Limpar cache Docker | `docker builder prune -a` |
 
 ---
 
-# 📂 Persistência de Logs Local
+# Arquivo `.env.example`
 
-Ao rodar a aplicação, o Docker criará automaticamente uma pasta chamada `/logs` na raiz do seu projeto local através de volumes espelhados:
+O modelo do repositório descreve as variáveis esperadas:
 
-```text
-./logs:/app/logs
+```env
+# Configurações do n8n
+N8N_WEBHOOK_URL="YOUR_URL_TEST_IN_N8N"
+N8N_WEBHOOK_URL_RECEPTIONIST="YOUR_URL_TEST_IN_N8N_RECEPTIONIST"
+
+# Configurações do Grafana / Promtail
+GRAFANA_LOKI_URL='YOUR_URL_IN_GRAFANA_CLOUD'
+
+# DATABASE
+DB_NAME=exampledb
+DB_USER=exampleuser
+DB_PASSWORD=123
 ```
 
-O arquivo `application.log` gerado pelo Spring Boot será gravado nessa pasta, permitindo que o container do Promtail faça a leitura dele de forma assíncrona e segura em modo somente-leitura (`:ro`), garantindo a integridade dos dados antes do envio ao Grafana Cloud.
+---
+
+# Observações finais
+
+- `application.yaml` usa `DB_PASSWORD` para a conexão com o PostgreSQL.
+- `docker-compose.yml` define `DB_PASS=${DB_PASSWORD}` e `DB_PASSWORD=${DB_PASSWORD}`; a aplicação Spring usa `DB_PASSWORD`.
+- O arquivo `AuthController.java` existe no código, mas atualmente não contém rotas ativas.
+
+---
+
+# Referências
+
+- `Dockerfile`: build multi-stage
+- `docker-compose.yml`: serviços e rede Docker
+- `promtail-config.yml`: configuração de envio de logs para Loki
+- `application.yaml`: configurações de datasource, JPA e n8n
