@@ -1,6 +1,6 @@
 package com.derikddev.api_comandvoice.infra.gateway;
 
-import com.derikddev.api_comandvoice.dto.request.CommandVoiceRequest;
+import com.derikddev.api_comandvoice.dto.request.ReceptionistRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -12,30 +12,29 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-public class N8nGateway {
-
+public class N8nReceptionist {
     private final RestClient restClient;
     private final String n8nurl;
 
 
-    public N8nGateway(@Value("${app.integration.n8n.webhook-url}") String n8nurl) {
-        // Configurando timeouts de forma explícita para evitar travar a API
-        SimpleClientHttpRequestFactory requestFactoryReception = new SimpleClientHttpRequestFactory();
-        requestFactoryReception.setConnectTimeout(5000);
-        requestFactoryReception.setReadTimeout(60000);
+    public N8nReceptionist(@Value("${app.integration.n8n.webhook-url-receptionist}") String n8nurl) {
+        // setting a timeout to prevent the API from freezing.
+        SimpleClientHttpRequestFactory requestFactoryRecept = new SimpleClientHttpRequestFactory();
+        requestFactoryRecept.setConnectTimeout(5000);
+        requestFactoryRecept.setReadTimeout(60000);
 
         String trackingId = UUID.randomUUID().toString();
         log.atInfo()
-                .setMessage("Starting connection with n8n")
+                .setMessage("N8N receptionist attending to new request")
                 .addKeyValue("tracking_Id", trackingId)
                 .log();
         this.restClient = RestClient.builder()
-                .requestFactory(requestFactoryReception)
+                .requestFactory(requestFactoryRecept)
                 .build();
         this.n8nurl = n8nurl;
     }
 
-    public String sendCommand(CommandVoiceRequest request){
+    public String sendCommandToRecept(ReceptionistRequest request){
         try {
             String trackingId = UUID.randomUUID().toString();
             log.atInfo()
@@ -51,17 +50,17 @@ public class N8nGateway {
                     .body(String.class);
 
             log.atInfo()
-                    .setMessage("Payload integrate with sucess in receptionist!")
+                    .setMessage("Payload integrate with sucess!")
                     .addKeyValue("tracking_Id", trackingId)
                     .log();
             return n8nResponse;
         } catch (Exception e) {
             String trackingId = UUID.randomUUID().toString();
             log.atInfo()
-                    .setMessage("Fatal error in recept HTTP with n8n")
+                    .setMessage("Fatal error in comuniction HTTP with n8n")
                     .addKeyValue("tracking_Id", trackingId)
                     .log();
-            throw new RuntimeException("Fatal error in recept HTTP with n8n.", e);
+            throw new RuntimeException("Fatal error in comuniction HTTP with n8n.", e);
         }
     }
 }

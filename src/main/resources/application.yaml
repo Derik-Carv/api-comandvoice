@@ -27,4 +27,5 @@ logging:
 app:
   integration:
     n8n:
-      webhook-url: ${N8N_WEBHOOK_URL:https://n8n.derikdev.cloud/webhook-test/comand-voice}
+      webhook-url: ${N8N_WEBHOOK_URL}
+      webhook-url-receptionist: ${N8N_WEBHOOK_URL_RECEPTIONIST}

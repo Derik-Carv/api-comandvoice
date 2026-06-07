@@ -9,6 +9,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - N8N_WEBHOOK_URL=${N8N_WEBHOOK_URL}
+      - N8N_WEBHOOK_URL_RECEPTIONIST=${N8N_WEBHOOK_URL_RECEPTIONIST}
       - DB_HOST=db
       - DB_PORT=5432
       - DB_NAME=${DB_NAME}

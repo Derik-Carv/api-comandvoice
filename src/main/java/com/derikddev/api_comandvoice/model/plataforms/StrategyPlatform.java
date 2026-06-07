@@ -1,9 +1,7 @@
 package com.derikddev.api_comandvoice.model.plataforms;
 
-import com.derikddev.api_comandvoice.dto.request.ComandVoiceRequest;
-
 public interface StrategyPlatform {
-    boolean conditionPlataform(String plaform);
+    boolean conditionPlatform(String platform);
 
-    void execCustomComand (ComandVoiceRequest request);
+    void execCustomCommand(Object request);
 }

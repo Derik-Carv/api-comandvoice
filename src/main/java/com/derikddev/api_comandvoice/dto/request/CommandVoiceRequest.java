@@ -9,16 +9,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Data
 @NoArgsConstructor
-public class ComandVoiceRequest {
+public class CommandVoiceRequest {
 
-    @NotBlank(message = "O texto do comando de voz não pode estar vazio.")
+    @NotBlank(message = "The voice command text cannot be empty.")
     private String comand;
 
-    @NotBlank(message = "O texto do comando de voz não pode estar vazio.")
+    @NotBlank(message = "The voice command text cannot be empty.")
     private String system;
 
-    @NotBlank(message = "O texto do comando de voz não pode estar vazio.")
-    @Size(min = 3, max = 500, message = "O comando deve conter o minimo de 3 e o maximo e 500 caracteres.")
+    @NotBlank(message = "The voice command text cannot be empty.")
+    @Size(min = 3, max = 500, message = "The command must contain a minimum of 3 and a maximum of 500 characters.")
     private String plataform;
 
     @Override
