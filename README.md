@@ -186,6 +186,20 @@ DB_PASSWORD=123
 
 ---
 
+# COMANDO DE TESTE VIA TERMINAL
+
+```
+curl -X POST http://localhost:8080/api/comands/receptionist \
+     -H "Content-Type: application/json" \
+     -d '{
+       "body": "SEU COMANDDO AQUI",
+       "platform": "whatsapp",
+       "system": "whatsapp"
+     }'
+```
+
+---
+
 # Observações finais
 
 - `application.yaml` usa `DB_PASSWORD` para a conexão com o PostgreSQL.
